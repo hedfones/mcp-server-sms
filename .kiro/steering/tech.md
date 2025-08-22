@@ -1,48 +1,47 @@
-# Technology Stack
+---
+inclusion: always
+---
+
+# Technology Stack & Development Guidelines
 
 ## Core Technologies
-- **Runtime**: Node.js >= 18 (ES2022 target)
-- **Language**: TypeScript with strict mode enabled
-- **Module System**: ES modules (type: "module")
+- **Runtime**: Node.js >= 18 with ES2022 target
+- **Language**: TypeScript with strict mode (all strict options enabled)
+- **Module System**: ES modules only (`type: "module"` in package.json)
 - **Build Target**: Node16 module resolution
 
-## Key Dependencies
-- `@modelcontextprotocol/sdk`: MCP server framework
-- `twilio`: Official Twilio API client
-- `zod`: Runtime type validation and schema definition
+## Critical Dependencies
+- `@modelcontextprotocol/sdk`: MCP server framework - use for server creation and tool registration
+- `twilio`: Official Twilio API client - initialize with ACCOUNT_SID and AUTH_TOKEN
+- `zod`: Runtime validation - use for all input validation and schema definitions
 
-## Development Dependencies
-- `typescript`: TypeScript compiler
-- `@types/node`: Node.js type definitions
-- `shx`: Cross-platform shell commands
+## Code Style Requirements
+- **Import Style**: Use ES6 imports (`import/export`), never CommonJS (`require`)
+- **Type Safety**: All functions must have explicit return types
+- **Validation**: Use Zod schemas for runtime type checking on all external inputs
+- **Error Handling**: Always wrap Twilio API calls in try/catch blocks
+- **Phone Numbers**: Validate E.164 format (+1234567890) before any Twilio calls
+- **Logging**: Use `console.error()` for server logs, structured JSON for user responses
 
-## Build System
-- **Compiler**: TypeScript compiler (tsc)
-- **Output**: `./build` directory
-- **Entry Point**: `build/index.js` (executable)
-
-## Common Commands
+## Build & Development
 ```bash
-# Build the project
+# Build TypeScript to executable
 npm run build
 
-# Watch mode for development
+# Development with auto-rebuild
 npm run watch
 
-# Prepare for publishing (runs build)
-npm run prepare
-
-# Test the server locally
+# Test locally (requires env vars)
 npx -y @yiyang.1i/sms-mcp-server
 ```
 
-## Environment Configuration
-Required environment variables:
-- `ACCOUNT_SID`: Twilio account SID
-- `AUTH_TOKEN`: Twilio authentication token  
+## Environment Variables (Required)
+- `ACCOUNT_SID`: Twilio account identifier
+- `AUTH_TOKEN`: Twilio authentication token
 - `FROM_NUMBER`: Twilio phone number in E.164 format
 
-## Distribution
-- Published as npm package with executable binary
-- Designed to run via `npx` without local installation
+## Distribution Model
+- Single executable package published to npm
+- Must work via `npx` without local installation
 - Uses stdio transport for MCP communication
+- Entry point: `build/index.js` with shebang for direct execution
