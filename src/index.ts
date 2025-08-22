@@ -9,13 +9,23 @@ import http from "http";
 const requiredEnvVars = ["ACCOUNT_SID", "AUTH_TOKEN", "FROM_NUMBER"];
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
-    console.error(`Error: ${envVar} environment variable is required`);
+    console.error(`Error: Missing required environment variable ${envVar}`);
+    console.error(`For Railway deployment, ensure ${envVar} is set in your Railway project environment variables.`);
+    console.error(`Visit your Railway project dashboard to configure environment variables.`);
     process.exit(1);
   }
 }
 
-// PORT environment variable handling with Railway support
+// PORT environment variable handling with Railway support and default fallback
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+
+// Validate PORT is a valid number
+if (isNaN(PORT) || PORT <= 0 || PORT > 65535) {
+  console.error(`Error: Invalid PORT environment variable: ${process.env.PORT}`);
+  console.error(`PORT must be a valid number between 1 and 65535.`);
+  console.error(`Railway automatically provides a PORT variable - ensure it's not being overridden.`);
+  process.exit(1);
+}
 
 // Initialize Twilio client
 const client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
@@ -228,25 +238,34 @@ async function main() {
   // Configure server to bind to :: (IPv6) address for Railway compatibility
   httpServer.listen(PORT, "::", () => {
     console.error(`Twilio SMS MCP Server running on HTTP port ${PORT} (IPv6)`);
+    console.error(`Server is ready for Railway deployment. Access via your Railway app URL.`);
+    console.error(`MCP endpoint available at: /message`);
   });
 
   // Handle IPv6 binding failures gracefully
   httpServer.on('error', (error: NodeJS.ErrnoException) => {
     if (error.code === 'EADDRINUSE') {
       console.error(`Error: Port ${PORT} is already in use`);
+      console.error(`On Railway, this usually indicates a deployment configuration issue.`);
+      console.error(`Check your Railway service logs and ensure no other processes are using this port.`);
     } else if (error.code === 'EADDRNOTAVAIL') {
       console.error(`Error: IPv6 address not available, falling back to IPv4`);
+      console.error(`Railway supports IPv6, but falling back to IPv4 for compatibility.`);
       // Fallback to IPv4 if IPv6 fails
       httpServer.listen(PORT, '0.0.0.0', () => {
         console.error(`Twilio SMS MCP Server running on HTTP port ${PORT} (IPv4 fallback)`);
+        console.error(`Server is ready for Railway deployment. Access via your Railway app URL.`);
       });
     } else {
       console.error(`HTTP server error: ${error.message}`);
+      console.error(`For Railway deployment issues, check your service logs in the Railway dashboard.`);
     }
   });
 }
 
 main().catch((error) => {
-  console.error("Fatal error in main():", error);
+  console.error("Fatal error starting server:", error);
+  console.error("For Railway deployment, check your environment variables and service configuration.");
+  console.error("Ensure all required Twilio credentials are set in your Railway project settings.");
   process.exit(1);
 });
