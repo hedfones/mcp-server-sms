@@ -128,16 +128,9 @@ async function main() {
     if (url.pathname === '/message') {
       if (req.method === 'GET') {
         // GET request handler for SSE connection establishment
-        res.writeHead(200, {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        });
-
         try {
           // Create SSE transport and connect MCP server
+          // Let SSEServerTransport handle the headers
           const transport = new SSEServerTransport('/message', res);
           
           // Add transport error handling with logging
@@ -158,11 +151,13 @@ async function main() {
           
         } catch (error) {
           console.error('Error establishing SSE connection:', error);
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ 
-            error: 'Failed to establish SSE connection',
-            details: error instanceof Error ? error.message : 'Unknown error'
-          }));
+          if (!res.headersSent) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              error: 'Failed to establish SSE connection',
+              details: error instanceof Error ? error.message : 'Unknown error'
+            }));
+          }
         }
         
       } else if (req.method === 'POST') {

@@ -36,14 +36,14 @@
   - Update startup error messages for Railway deployment context
   - _Requirements: 1.2, 1.5, 3.5_
 
-- [ ] 4. Test HTTP transport functionality
-- [ ] 4.1 Create local HTTP server test
+- [x] 4. Test HTTP transport functionality
+- [x] 4.1 Create local HTTP server test
   - Write test script to verify HTTP server starts correctly
   - Test SSE connection establishment via curl
   - Verify JSON-RPC message handling over HTTP POST
   - _Requirements: 1.1, 1.3, 3.1, 3.2_
 
-- [ ] 4.2 Test SMS functionality over HTTP
+- [x] 4.2 Test SMS functionality over HTTP
   - Test send-message tool via HTTP POST request
   - Verify Twilio integration works with HTTP transport
   - Test error handling for invalid phone numbers and messages
